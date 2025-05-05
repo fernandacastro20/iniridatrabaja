@@ -10,7 +10,7 @@ class IniridaTrabajaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Inírida Trabaja',
+      title: 'Inírida no Trabaja',
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
