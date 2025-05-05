@@ -4,8 +4,7 @@ import '../widgets/tarjeta_oferta.dart';
 import '../widgets/boton_categoria.dart';
 import '../formularios/formulario_publicar.dart';
 import '../utilidades/gestor_consejos.dart';
-import 'pantalla_historial.dart';
-import 'pantalla_sugerencias.dart';
+import 'detalle_oferta.dart';
 
 class PantallaInicio extends StatefulWidget {
   final List<OfertaLaboral> ofertas;
@@ -56,6 +55,16 @@ class _PantallaInicioState extends State<PantallaInicio> {
     });
   }
 
+  void filtrarBusqueda(String query) {
+    setState(() {
+      ofertasFiltradas = widget.ofertas
+          .where((oferta) =>
+              oferta.titulo.toLowerCase().contains(query.toLowerCase()) ||
+              oferta.descripcion.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    });
+  }
+
   void agregarAlHistorial(OfertaLaboral oferta) {
     setState(() {
       if (!historial.any((o) => o.id == oferta.id)) {
@@ -68,7 +77,11 @@ class _PantallaInicioState extends State<PantallaInicio> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Publicar Oferta'),
+        backgroundColor: const Color.fromARGB(255, 226, 214, 248), // Cambia el color de fondo
+        title: Text(
+          'Publicar Oferta',
+          style: TextStyle(color: const Color.fromARGB(255, 255, 255, 255)), // Cambia el color del texto del título
+        ),
         content: FormularioPublicar(
           onSubmit: (nuevaOferta) {
             setState(() {
@@ -78,6 +91,9 @@ class _PantallaInicioState extends State<PantallaInicio> {
             Navigator.pop(context);
           },
         ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.0), // Bordes redondeados
+        ),
       ),
     );
   }
@@ -86,41 +102,51 @@ class _PantallaInicioState extends State<PantallaInicio> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Inírida Trabaja'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.history),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => PantallaHistorial(historial: historial),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Inírida Trabaja'), // Título de la AppBar
+            SizedBox(
+              width: 200, // Ancho de la barra de búsqueda
+              child: TextField(
+                onChanged: (value) {
+                  filtrarBusqueda(value); // Llama a la función para filtrar las ofertas
+                },
+                decoration: InputDecoration(
+                  hintText: 'Buscar...',
+                  hintStyle: TextStyle(color: const Color.fromARGB(179, 251, 255, 251)),
+                  prefixIcon: Icon(Icons.search, color: Colors.white),
+                  filled: true,
+                  fillColor: const Color.fromARGB(57, 0, 0, 0),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
-              );
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.lightbulb_outline),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => PantallaSugerencias()),
-              );
-            },
-          ),
-        ],
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: const Color.fromARGB(255, 155, 255, 158),
       ),
       body: Column(
         children: [
+          // Contenedor del Gestor de Consejos
           Container(
             padding: EdgeInsets.all(8.0),
-            color: Colors.yellow[100],
+            color: const Color.fromARGB(255, 255, 245, 151),
             child: Text(
               consejoActual,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: Colors.green[700]),
+              style: TextStyle(fontSize: 14, color: const Color.fromARGB(255, 13, 73, 17)),
             ),
           ),
+
+          // Espacio entre el Gestor de Consejos y los Botones de Categorías
+          SizedBox(height: 16.0), // Espacio de 16 píxeles
+
+          // Botones de Categorías y Botón "Publicar Oferta"
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -145,13 +171,24 @@ class _PantallaInicioState extends State<PantallaInicio> {
                   seleccionada: categoriaSeleccionada == 'Venta de Comida Local',
                   onPressed: () => filtrarOfertas('Venta de Comida Local'),
                 ),
+                SizedBox(width: 8.0), // Espacio entre los botones de categorías y el botón "Publicar Oferta"
                 ElevatedButton(
                   onPressed: () => mostrarFormularioPublicar(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 82, 35, 255), // Cambia el color de fondo
+                    foregroundColor: Colors.white, // Cambia el color del texto
+                    padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0), // Ajusta el tamaño del botón
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0), // Bordes redondeados
+                    ),
+                  ),
                   child: Text('Publicar Oferta'),
                 ),
               ],
             ),
           ),
+
+          // Lista de ofertas filtradas
           Expanded(
             child: ListView.builder(
               itemCount: ofertasFiltradas.length,
@@ -159,7 +196,15 @@ class _PantallaInicioState extends State<PantallaInicio> {
                 final oferta = ofertasFiltradas[index];
                 return TarjetaOferta(
                   oferta: oferta,
-                  onTap: () => agregarAlHistorial(oferta),
+                  onTap: () {
+                    agregarAlHistorial(oferta);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DetalleOferta(oferta: oferta),
+                      ),
+                    );
+                  },
                 );
               },
             ),

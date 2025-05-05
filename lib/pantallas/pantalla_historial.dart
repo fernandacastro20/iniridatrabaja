@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../modelos/oferta_laboral.dart';
 import '../widgets/tarjeta_oferta.dart';
+import 'detalle_oferta.dart';
 
 class PantallaHistorial extends StatelessWidget {
   final List<OfertaLaboral> historial;
@@ -17,7 +18,17 @@ class PantallaHistorial extends StatelessWidget {
               itemCount: historial.length,
               itemBuilder: (context, index) {
                 final oferta = historial[index];
-                return TarjetaOferta(oferta: oferta);
+                return TarjetaOferta(
+                  oferta: oferta,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DetalleOferta(oferta: oferta),
+                      ),
+                    );
+                  },
+                );
               },
             ),
     );
